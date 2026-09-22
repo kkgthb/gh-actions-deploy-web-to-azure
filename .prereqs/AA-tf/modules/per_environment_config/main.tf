@@ -119,9 +119,75 @@ resource "azuread_application_federated_identity_credential" "the_entra_appreg_f
 # Azure resources
 # ---------------
 
-resource "azurerm_resource_group" "my_resource_group" {
-  name     = "${var.workload_nickname}-rg-demo"
+resource "random_string" "random_suffix" {
+  length  = 6
+  special = false
+  upper   = false
+}
+
+resource "azurerm_resource_group" "the_az_rg" {
+  name     = "${var.workload_nickname}-rg-${var.environment_nickname}"
   location = "centralus"
 }
 
-# TODO:  Azure Function App & the funcapp-scoped Azure RBAC Role Assignment of "Website Contributor" to `azuread_service_principal.the_entra_sp`
+resource "azurerm_storage_account" "the_az_sa" {
+  name                      = "${var.workload_nickname}-sa-${var.environment_nickname}-${random_string.random_suffix.result}"
+  resource_group_name       = azurerm_resource_group.the_az_rg.name
+  location                  = azurerm_resource_group.the_az_rg.location
+  account_tier              = "Standard"
+  account_replication_type  = "LRS"
+  shared_access_key_enabled = false
+}
+
+resource "azurerm_service_plan" "the_az_asp" {
+  name                = "${var.workload_nickname}-asp-${var.environment_nickname}-${random_string.random_suffix.result}"
+  resource_group_name = azurerm_resource_group.the_az_rg.name
+  location            = azurerm_resource_group.the_az_rg.location
+  os_type             = "Linux"
+  sku_name            = "Y1" # Dynamic Consumption Plan
+}
+
+resource "azurerm_linux_function_app" "the_az_fa" {
+  name                 = "${var.workload_nickname}-fa-${var.environment_nickname}-${random_string.random_suffix.result}"
+  resource_group_name  = azurerm_resource_group.the_az_rg.name
+  location             = azurerm_resource_group.the_az_rg.location
+  service_plan_id      = azurerm_service_plan.the_az_asp.id
+  storage_account_name = azurerm_storage_account.the_az_sa.name
+  identity {
+    type = "SystemAssigned"
+  }
+  site_config {
+    application_stack {
+      node_version = "24"
+    }
+  }
+}
+
+# This Azure RBAC Role Assignment grants the Entra Service Principal (used by GitHub Actions) permissions to deploy into the Azure Function App.
+resource "azurerm_role_assignment" "cicd_az_rbacra_wc" {
+  scope                = azurerm_linux_function_app.the_az_fa.id
+  role_definition_name = "Website Contributor"
+  principal_id         = azuread_application.the_entra_appreg.client_id
+}
+
+# TODO:  validate if this is right.  LLM-generated.
+resource "azurerm_role_assignment" "functostor_az_rbacra_bdo" {
+  scope                = azurerm_storage_account.the_az_sa.id
+  role_definition_name = "Storage Blob Data Owner"
+  principal_id         = azurerm_linux_function_app.the_az_fa.identity[0].principal_id
+}
+
+# TODO:  validate if this is right.  LLM-generated.
+resource "azurerm_role_assignment" "functostor_az_rbacra_sac" {
+  scope                = azurerm_storage_account.the_az_sa.id
+  role_definition_name = "Storage Account Contributor"
+  principal_id         = azurerm_linux_function_app.the_az_fa.identity[0].principal_id
+}
+
+# TODO:  validate if this is right.  LLM-generated.
+resource "azurerm_role_assignment" "functostor_az_rbacra_qdc" {
+  scope                = azurerm_storage_account.the_az_sa.id
+  role_definition_name = "Storage Queue Data Contributor"
+  principal_id         = azurerm_linux_function_app.the_az_fa.identity[0].principal_id
+}
+

@@ -9,5 +9,8 @@ terraform {
     github = {
       source = "integrations/github"
     }
+    random = {
+      source = "hashicorp/random"
+    }
   }
 }

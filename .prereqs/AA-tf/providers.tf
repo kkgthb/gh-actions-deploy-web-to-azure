@@ -23,3 +23,7 @@ provider "azurerm" {
 provider "github" {
   alias = "demo"
 }
+# Configure the Random" Terraform provider
+provider "random" {
+  alias = "demo"
+}
