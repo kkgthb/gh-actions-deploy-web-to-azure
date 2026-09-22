@@ -29,9 +29,11 @@ jobs:
           node-version: 24
       - id: "install_npm_dependencies"
         name: "Install NPM dependencies"
+        working-directory: "${{ github.workspace }}/src/web"
         run: "npm ci"
       - id: "build_executable"
         name: "Build Azure Functions executable"
+        working-directory: "${{ github.workspace }}/src/web"
         run: |
           npm run build --if-present
       - id: "upload_build_artifact"
