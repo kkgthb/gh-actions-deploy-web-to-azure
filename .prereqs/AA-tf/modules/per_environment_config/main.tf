@@ -178,7 +178,7 @@ resource "azurerm_linux_function_app" "the_az_fa" {
 resource "azurerm_role_assignment" "cicd_az_rbacra_wc" {
   scope                = azurerm_linux_function_app.the_az_fa.id
   role_definition_name = "Website Contributor"
-  principal_id         = azuread_application.the_entra_sp.object_id
+  principal_id         = azuread_service_principal.the_entra_sp.object_id
 }
 
 # TODO:  validate if this is right.  LLM-generated.
