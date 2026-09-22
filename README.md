@@ -22,3 +22,11 @@ For **each** of your environments like `nonprod` and `prod`:
     * Also, Either edit the `name` property under the `environment` property of the deploy jobs in `build-and-deploy.yml`, or, like I did, give your repo a repo-wide GitHub Actions named, say, `envpointer_nonprod` / `envpointer_prod` and make the value of that variable the name of your environment.
         * _(It doesn't matter which approach you take, and maybe hardcoding is better.  I just didn't want to hardcode certain distracting quirks about the way I chose to name my GitHub "environments" into `build-and-deploy.yml`, so in this demo, I hid some of those quirks from `build-and-deploy.yml` behind an extra variable.  My approach is probably way overengineered for an enterprise production scenario -- usually I just hardcode the `environment: name: ` value into the `.yml` file, honestly.)_
 * **GitHub:** Configure any required GitHub "environment" reviewers that your business says you should be adding, then be sure to approve the deployment when the workflow pauses for review.
+
+## Disclaimer
+
+I suspect I did the source code and "build" process all wrong, because I don't typically author Azure Functions.
+
+Please don't use my idea of how to author source code destined for Azure Functions, or what the shell-scripting steps should look like in a "build" process destined for Azure Functions, literally.
+
+This code builds and deploys, but I'm just trying to show off the overall structure of the GitHub Actions YAML and how it relates to environment approvals and Entra Federated Credentials ... not my skill as an Azure Functions developer.
