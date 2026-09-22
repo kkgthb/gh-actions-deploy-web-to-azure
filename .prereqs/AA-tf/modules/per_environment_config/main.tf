@@ -148,11 +148,12 @@ resource "azurerm_service_plan" "the_az_asp" {
 }
 
 resource "azurerm_linux_function_app" "the_az_fa" {
-  name                 = "${var.workload_nickname}-fa-${var.environment_nickname}-${random_string.random_suffix.result}"
-  resource_group_name  = azurerm_resource_group.the_az_rg.name
-  location             = azurerm_resource_group.the_az_rg.location
-  service_plan_id      = azurerm_service_plan.the_az_asp.id
-  storage_account_name = azurerm_storage_account.the_az_sa.name
+  name                          = "${var.workload_nickname}-fa-${var.environment_nickname}-${random_string.random_suffix.result}"
+  resource_group_name           = azurerm_resource_group.the_az_rg.name
+  location                      = azurerm_resource_group.the_az_rg.location
+  service_plan_id               = azurerm_service_plan.the_az_asp.id
+  storage_account_name          = azurerm_storage_account.the_az_sa.name
+  storage_uses_managed_identity = true
   identity {
     type = "SystemAssigned"
   }
@@ -160,6 +161,10 @@ resource "azurerm_linux_function_app" "the_az_fa" {
     application_stack {
       node_version = "24"
     }
+  }
+  app_settings = {
+    # Points host connection string replacement to the identity endpoint
+    "AzureWebJobsStorage__accountName" = azurerm_storage_account.the_az_sa.name
   }
 }
 
