@@ -4,6 +4,9 @@ output "azure_nonprod_resource_group_name" {
 output "azure_prod_resource_group_name" {
   value = module.azure_prod.resource_group_name
 }
+output "entra_round1_tenant_id" {
+  value = module.entra_appreg.tenant_id
+}
 output "github_repo_full_name" {
   value = module.github.repo_full_name
 }

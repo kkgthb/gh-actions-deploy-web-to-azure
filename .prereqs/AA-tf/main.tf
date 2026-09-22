@@ -18,6 +18,14 @@ module "azure_prod" {
   workload_nickname = "${var.workload_nickname}-prod"
 }
 
+module "entra_appreg" {
+  source = "./modules/entra_appreg"
+  providers = {
+    azuread = azuread.demo
+  }
+  entra_tenant_id = var.entra_tenant_id
+}
+
 module "github" {
   source = "./modules/github"
   providers = {

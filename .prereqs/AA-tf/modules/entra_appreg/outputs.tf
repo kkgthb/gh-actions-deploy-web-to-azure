@@ -1,0 +1,3 @@
+output "tenant_id" {
+  value = data.azuread_client_config.current_azuread_config.tenant_id
+}

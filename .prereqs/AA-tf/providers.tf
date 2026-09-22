@@ -1,3 +1,8 @@
+# Configure the AzureAD (Entra) Terraform provider
+provider "azuread" {
+  alias     = "demo"
+  tenant_id = var.entra_tenant_id
+}
 # Configure the AzureRM Terraform provider for "nonprod"
 provider "azurerm" {
   features {}
