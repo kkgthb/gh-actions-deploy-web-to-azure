@@ -1,12 +1,12 @@
-output "azure_nonprod_resource_group_name" {
-  value = module.azure_nonprod.resource_group_name
+output "entra_appreg_display_name" {
+  value = module.nonprod_env_config.entra_appreg_display_name
 }
-output "azure_prod_resource_group_name" {
-  value = module.azure_prod.resource_group_name
+output "github_environment_name" {
+  value = module.nonprod_env_config.github_environment_name
 }
-output "entra_round1_tenant_id" {
-  value = module.entra_appreg.tenant_id
+output "entra_appreg_fedcred_subject" {
+  value = module.nonprod_env_config.entra_appreg_fedcred_subject
 }
-output "github_repo_full_name" {
-  value = module.github.repo_full_name
+output "azure_resource_group_name" {
+  value = module.nonprod_env_config.azure_resource_group_name
 }

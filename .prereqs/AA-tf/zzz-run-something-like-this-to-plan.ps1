@@ -18,9 +18,11 @@ Push-Location("$PsScriptRoot")
 
 terraform init
 
+# Normally the nonprod and prod would be different Azure subscriptions, but I happen to only have access to one while making this demo.
 terraform plan `
     -var entra_tenant_id="$([Environment]::GetEnvironmentVariable('DEMOS_my_entra_tenant_id', 'User'))" `
-    -var az_sub_id="$([Environment]::GetEnvironmentVariable('DEMOS_my_azure_subscription_id', 'User'))" `
+    -var az_sub_id_nonprod="$([Environment]::GetEnvironmentVariable('DEMOS_my_azure_subscription_id', 'User'))" `
+    -var az_sub_id_prod="$([Environment]::GetEnvironmentVariable('DEMOS_my_azure_subscription_id', 'User'))" `
     -var workload_nickname="$([Environment]::GetEnvironmentVariable('DEMOS_my_workload_nickname', 'User'))" `
     -var current_gh_repo_name="$current_repo_name" `
     -var current_gh_repo_numeric_id="$current_repo_numeric_id" `
