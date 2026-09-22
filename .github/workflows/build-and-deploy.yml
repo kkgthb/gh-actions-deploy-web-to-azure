@@ -1,0 +1,104 @@
+name: Azure Static Web Apps CI/CD
+
+on:
+  # Run this GitHub Action every time someone force-pushes to main
+  # (note:  this will only run when pull-requests into main get approved & closed out
+  #    if main is a branch that has force-push protection enabled).
+  push:
+    branches:
+      - main
+
+# Maybe we need id-token: 'write' -- I can't remember -- but
+# https://cheatsheetseries.owasp.org/cheatsheets/GitHub_Actions_Security_Cheat_Sheet.html#minimize-github_token-permissions
+# says to start with {} so that's my new default in demos
+permissions: {}
+
+runs-on: "ubuntu-latest"
+
+jobs:
+  build_job:
+    permissions:
+      contents: "read"
+    steps:
+      - id: "write_hello_world_file"
+        name: 'Write "Hello, world" into a file -- this represents a "build process."'
+        run: 'mkdir -p ${{ github.workspace }}/folder_into_which_i_built_my_build && echo "Hello, World!" > ${{ github.workspace }}/folder_into_which_i_built_my_build/helloworld.txt'
+      - id: "upload_build_artifact"
+        name: 'Upload the just-generated "build artifact" folder into CI/CD-pipeline-specific inter-job artifact storage'
+        uses: actions/upload-artifact@v7
+        with:
+          name: "mybuild_GIVE_ME_A_BETTER_NAME"
+          path: "${{ github.workspace }}/folder_into_which_i_built_my_build"
+          if-no-files-found: error
+
+  deploy_to_nonprod_job:
+    if: false  # TODO:  remove this.  This hardcodes the job to be skipped every time
+    needs: "build_job"
+    environment:
+      name: "${{ vars.envpointer_nonprod }}"
+    permissions:
+      actions: "read" # Needed by "actions/download-artifact"
+      id-token: "write" # Needed by "azure/login"
+    steps:
+      - id: "download_built_artifact"
+        name: 'Download the "built artifact" folder from CI/CD-pipeline-specific inter-job artifact storage'
+        uses: "actions/download-artifact@v8"
+        with:
+          run-id: "${{ github.run_id }}"
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          name: "mybuild_GIVE_ME_A_BETTER_NAME"
+          path: "./folder_where_i_want_the_built_copy_now_in_my_nonprod_deploy_job"
+      - id: "log_into_azure_nonprod"
+        name: "Log this GitHub Actions job into the nonprod targeted cloud environment"
+        uses: "azure/login@v3"
+        with:
+          tenant-id: ${{ secrets.ENTRA_TENANT_ID }}
+          client-id: ${{ secrets.ENTRA_CLIENT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+          allow-no-subscriptions: true
+      - id: "validate_that_we_are_logged_into_nonprod_with_az_cli"
+        name: "Test the connection to Azure using the Azure CLI"
+        run: "az account show"
+      # - id: "deploy_into_nonprod_function_app"
+      #   name: "Deploy into the nonprod function app"
+      #   uses: "Azure/functions-action@v1"
+      #   with:
+      #     app-name: "${{ secrets.AZURE_FUNCTIONAPP_NAME }}"
+      #     package: "${{ github.workspace }}/folder_where_i_want_the_built_copy_now_in_my_nonprod_deploy_job"
+
+  deploy_to_prod_job:
+    if: false  # TODO:  remove this.  This hardcodes the job to be skipped every time
+    needs: "deploy_to_nonprod_job"
+    environment:
+      name: "${{ vars.envpointer_prod }}"
+    permissions:
+      actions: "read" # Needed by "actions/download-artifact"
+      id-token: "write" # Needed by "azure/login"
+    steps:
+      - id: "download_built_artifact"
+        name: 'Download the "built artifact" folder from CI/CD-pipeline-specific inter-job artifact storage'
+        uses: "actions/download-artifact@v8"
+        with:
+          run-id: "${{ github.run_id }}"
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          name: "mybuild_GIVE_ME_A_BETTER_NAME"
+          path: "./folder_where_i_want_the_built_copy_now_in_my_prod_deploy_job"
+      - id: "log_into_azure_prod"
+        name: "Log this GitHub Actions job into the prod targeted cloud environment"
+        uses: "azure/login@v3"
+        with:
+          tenant-id: ${{ secrets.ENTRA_TENANT_ID }}
+          client-id: ${{ secrets.ENTRA_CLIENT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+          allow-no-subscriptions: true
+      - id: "validate_that_we_are_logged_into_prod_with_az_cli"
+        name: "Test the connection to Azure using the Azure CLI"
+        run: "az account show"
+      # - id: "deploy_into_prod_function_app"
+      #   name: "Deploy into the prod function app"
+      #   uses: "Azure/functions-action@v1"
+      #   with:
+      #     app-name: "${{ secrets.AZURE_FUNCTIONAPP_NAME }}"
+      #     package: "${{ github.workspace }}/folder_where_i_want_the_built_copy_now_in_my_prod_deploy_job"
