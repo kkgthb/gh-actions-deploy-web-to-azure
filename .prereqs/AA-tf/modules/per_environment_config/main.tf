@@ -74,11 +74,10 @@ resource "github_repository_environment" "the_gh_env" {
   repository  = data.github_repository.current_gh_repo.name
   environment = "${var.workload_nickname}-ghenv-${var.environment_nickname}"
   # Business note:  yes, same reviewer requirements for all environments, in this demo.
-  # TODO:  re-add review once done debugging.
-  # prevent_self_review = false
-  # reviewers {
-  #   users = [data.github_user.current_gh_logged_in_user.id]
-  # }
+  prevent_self_review = false
+  reviewers {
+    users = [data.github_user.current_gh_logged_in_user.id]
+  }
 }
 
 resource "github_actions_variable" "the_gh_env_pointer" {
@@ -170,7 +169,7 @@ resource "azurerm_linux_function_app" "the_az_fa" {
     }
   }
   app_settings = {
-    FUNCTIONS_WORKER_RUNTIME = "node"
+    FUNCTIONS_WORKER_RUNTIME           = "node"
     "AzureWebJobsStorage__accountName" = azurerm_storage_account.the_az_sa.name # Points host connection string replacement to the identity endpoint
   }
 }

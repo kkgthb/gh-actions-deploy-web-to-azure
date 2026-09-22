@@ -1,4 +1,4 @@
-name: Azure Static Web Apps CI/CD
+name: "Azure Function App CI/CD"
 
 on:
   # Run this GitHub Action every time someone force-pushes to main
@@ -91,38 +91,35 @@ jobs:
           app-name: "${{ secrets.AZURE_FUNCTIONAPP_NAME }}"
           package: "${{ github.workspace }}/folder_where_i_want_the_built_copy_now_in_my_nonprod_deploy_job"
 
-  # deploy_to_prod_job:
-  #   if: false  # TODO:  remove this.  This hardcodes the job to be skipped every time
-  #   needs: "deploy_to_nonprod_job"
-  #   environment:
-  #     name: "${{ vars.envpointer_prod }}"
-  #   permissions:
-  #     actions: "read" # Needed by "actions/download-artifact"
-  #     id-token: "write" # Needed by "azure/login"
-  #   steps:
-  #     - id: "download_built_artifact"
-  #       name: 'Download the "built artifact" folder from CI/CD-pipeline-specific inter-job artifact storage'
-  #       uses: "actions/download-artifact@v8"
-  #       with:
-  #         run-id: "${{ github.run_id }}"
-  #         github-token: "${{ secrets.GITHUB_TOKEN }}"
-  #         name: "mybuild_GIVE_ME_A_BETTER_NAME"
-  #         path: "${{ github.workspace }}/folder_where_i_want_the_built_copy_now_in_my_prod_deploy_job"
-  #     - id: "log_into_azure_prod"
-  #       name: "Log this GitHub Actions job into the prod targeted cloud environment"
-  #       uses: "azure/login@v3"
-  #       with:
-  #         tenant-id: ${{ secrets.ENTRA_TENANT_ID }}
-  #         client-id: ${{ secrets.ENTRA_CLIENT_ID }}
-  #         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-  #         enable-AzPSSession: true
-  #         allow-no-subscriptions: true
-  #     - id: "validate_that_we_are_logged_into_prod_with_az_cli"
-  #       name: "Test the connection to Azure using the Azure CLI"
-  #       run: "az account show"
-  #     # - id: "deploy_into_prod_function_app"
-  #     #   name: "Deploy into the prod function app"
-  #     #   uses: "Azure/functions-action@v1"
-  #     #   with:
-  #     #     app-name: "${{ secrets.AZURE_FUNCTIONAPP_NAME }}"
-  #     #     package: "${{ github.workspace }}/folder_where_i_want_the_built_copy_now_in_my_prod_deploy_job"
+  deploy_to_prod_job:
+    needs: "deploy_to_nonprod_job"
+    environment:
+      name: "${{ vars.envpointer_prod }}"
+    permissions:
+      actions: "read" # Needed by "actions/download-artifact"
+      id-token: "write" # Needed by "azure/login"
+    runs-on: "ubuntu-latest"
+    steps:
+      - id: "download_built_artifact"
+        name: 'Download the "built artifact" folder from CI/CD-pipeline-specific inter-job artifact storage'
+        uses: "actions/download-artifact@v8"
+        with:
+          run-id: "${{ github.run_id }}"
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          name: "mybuild_GIVE_ME_A_BETTER_NAME"
+          path: "${{ github.workspace }}/folder_where_i_want_the_built_copy_now_in_my_prod_deploy_job"
+      - id: "log_into_azure_prod"
+        name: "Log this GitHub Actions job into the prod targeted cloud environment"
+        uses: "azure/login@v3"
+        with:
+          tenant-id: ${{ secrets.ENTRA_TENANT_ID }}
+          client-id: ${{ secrets.ENTRA_CLIENT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+          allow-no-subscriptions: true
+      - id: "deploy_into_prod_function_app"
+        name: "Deploy into the prod function app"
+        uses: "Azure/functions-action@v1"
+        with:
+          app-name: "${{ secrets.AZURE_FUNCTIONAPP_NAME }}"
+          package: "${{ github.workspace }}/folder_where_i_want_the_built_copy_now_in_my_prod_deploy_job"
