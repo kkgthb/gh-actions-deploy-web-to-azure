@@ -2,7 +2,7 @@
     "name": "tiny-hello-world-function",
     "version": "1.0.0",
     "description": "Minimal Keyless Azure Function -- LLM-authored",
-    "main": "dist/src/functions/*.js",
+    "main": "src/functions/*.js",
     "scripts": {
         "clean": "rimraf dist",
         "build": "npm run clean && tsc && shx cp host.json package.json dist/",

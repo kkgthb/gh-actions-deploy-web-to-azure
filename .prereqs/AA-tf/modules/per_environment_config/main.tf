@@ -181,6 +181,13 @@ resource "azurerm_role_assignment" "cicd_az_rbacra_wc" {
   principal_id         = azuread_service_principal.the_entra_sp.object_id
 }
 
+# This Azure RBAC Role Assignment grants the Entra Service Principal (used by GitHub Actions) permissions to deploy into the underlying storage.
+resource "azurerm_role_assignment" "cicd_az_rbacra_bdc" {
+  scope                = azurerm_storage_account.the_az_sa.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azuread_service_principal.the_entra_sp.object_id
+}
+
 # TODO:  validate if this is right.  LLM-generated.
 resource "azurerm_role_assignment" "functostor_az_rbacra_bdo" {
   scope                = azurerm_storage_account.the_az_sa.id

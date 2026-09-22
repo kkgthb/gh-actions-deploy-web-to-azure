@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+  workflow_run: {} # TODO:  take this out when done troubleshooting
 
 # Maybe we need id-token: 'write' -- I can't remember -- but
 # https://cheatsheetseries.owasp.org/cheatsheets/GitHub_Actions_Security_Cheat_Sheet.html#minimize-github_token-permissions
@@ -36,6 +37,12 @@ jobs:
         working-directory: "${{ github.workspace }}/src/web"
         run: |
           npm run build --if-present
+      - id: "install_production_dependencies"
+        name: "Install production dependencies into deployment artifact"
+        working-directory: "${{ github.workspace }}/src/web"
+        run: |
+          cp package-lock.json dist/package-lock.json
+          npm ci --omit=dev --prefix dist
       - id: "upload_build_artifact"
         name: 'Upload the just-generated "build artifact" folder into CI/CD-pipeline-specific inter-job artifact storage'
         uses: "actions/upload-artifact@v7"
