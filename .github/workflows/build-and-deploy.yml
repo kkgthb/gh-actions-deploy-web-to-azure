@@ -13,10 +13,9 @@ on:
 # says to start with {} so that's my new default in demos
 permissions: {}
 
-runs-on: "ubuntu-latest"
-
 jobs:
   build_job:
+    runs-on: "ubuntu-latest"
     permissions:
       contents: "read"
     steps:
