@@ -22,6 +22,7 @@ provider "azurerm" {
 # Configure the GitHub Terraform provider
 provider "github" {
   alias = "demo"
+  owner = var.current_gh_repo_owner_login
 }
 # Configure the Random" Terraform provider
 provider "random" {

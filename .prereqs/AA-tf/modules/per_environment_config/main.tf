@@ -71,7 +71,7 @@ resource "azuread_service_principal" "the_entra_sp" {
 # ----------------------------------------
 
 resource "github_repository_environment" "the_gh_env" {
-  repository  = data.github_repository.current_gh_repo.full_name
+  repository  = data.github_repository.current_gh_repo.name
   environment = "${var.workload_nickname}-ghenv-${var.environment_nickname}"
   # Business note:  yes, same reviewer requirements for all environments, in this demo.
   prevent_self_review = false
@@ -81,7 +81,7 @@ resource "github_repository_environment" "the_gh_env" {
 }
 
 resource "github_actions_variable" "the_gh_env_pointer" {
-  repository    = data.github_repository.current_gh_repo.full_name
+  repository    = data.github_repository.current_gh_repo.name
   variable_name = "envpointer_${var.environment_nickname}"
   value         = github_repository_environment.the_gh_env.environment
 }
