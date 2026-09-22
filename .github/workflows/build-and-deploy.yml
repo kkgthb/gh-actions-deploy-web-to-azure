@@ -19,6 +19,9 @@ jobs:
     permissions:
       contents: "read"
     steps:
+      - id: "checkout"
+        name: "Check out repository"
+        uses: "actions/checkout@v7"
       - id: "write_hello_world_file"
         name: 'Write "Hello, world" into a file -- this represents a "build process."'
         run: 'mkdir -p ${{ github.workspace }}/folder_into_which_i_built_my_build && echo "Hello, World!" > ${{ github.workspace }}/folder_into_which_i_built_my_build/helloworld.txt'
@@ -29,11 +32,11 @@ jobs:
           node-version: 24
       - id: "install_npm_dependencies"
         name: "Install NPM dependencies"
-        working-directory: "./src/web"
+        working-directory: "${{ github.workspace }}/src/web"
         run: "npm ci"
       - id: "build_executable"
         name: "Build Azure Functions executable"
-        working-directory: "./src/web"
+        working-directory: "${{ github.workspace }}/src/web"
         run: |
           npm run build --if-present
       - id: "upload_build_artifact"
@@ -41,7 +44,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: "mybuild_GIVE_ME_A_BETTER_NAME"
-          path: "./src/web/dist"
+          path: "${{ github.workspace }}/src/web/dist"
           if-no-files-found: error
 
   # deploy_to_nonprod_job:
