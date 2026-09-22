@@ -80,6 +80,12 @@ resource "github_repository_environment" "the_gh_env" {
   }
 }
 
+resource "github_actions_variable" "the_gh_env_pointer" {
+  repository    = data.github_repository.current_gh_repo.full_name
+  variable_name = "envpointer_${var.environment_nickname}"
+  value         = github_repository_environment.the_gh_env.environment
+}
+
 resource "github_actions_environment_secret" "gh_env_secret_entra_tenant_id" {
   repository  = github_repository_environment.the_gh_env.repository
   environment = github_repository_environment.the_gh_env.environment
@@ -172,7 +178,7 @@ resource "azurerm_linux_function_app" "the_az_fa" {
 resource "azurerm_role_assignment" "cicd_az_rbacra_wc" {
   scope                = azurerm_linux_function_app.the_az_fa.id
   role_definition_name = "Website Contributor"
-  principal_id         = azuread_application.the_entra_appreg.client_id
+  principal_id         = azuread_application.the_entra_sp.object_id
 }
 
 # TODO:  validate if this is right.  LLM-generated.
