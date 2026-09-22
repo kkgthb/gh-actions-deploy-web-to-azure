@@ -27,7 +27,7 @@ jobs:
         name: "Setup NodeJS"
         uses: "actions/setup-node@v7"
         with:
-          node-version: 24
+          node-version: 22
       - id: "install_npm_dependencies"
         name: "Install NPM dependencies"
         working-directory: "${{ github.workspace }}/src/web"
@@ -37,12 +37,19 @@ jobs:
         working-directory: "${{ github.workspace }}/src/web"
         run: |
           npm run build --if-present
-      - id: "install_production_dependencies"
-        name: "Install production dependencies into deployment artifact"
+      - id: "reinstall_runtime_dependencies"
+        name: "Install runtime dependencies into executable"
         working-directory: "${{ github.workspace }}/src/web"
         run: |
           cp package-lock.json dist/package-lock.json
           npm ci --omit=dev --prefix dist
+      - id: "verify_executable_details"
+        name: "Verify Azure Function Apps executable file-and-folder contents details"
+        working-directory: ${{ github.workspace }}/src/web
+        run: |
+          test -f dist/package.json
+          test -f dist/src/functions/helloWorld.js
+          node -e "const p=require('./dist/package.json'); if (p.main !== 'src/functions/*.js') process.exit(1)"
       - id: "upload_build_artifact"
         name: 'Upload the just-generated "build artifact" folder into CI/CD-pipeline-specific inter-job artifact storage'
         uses: "actions/upload-artifact@v7"

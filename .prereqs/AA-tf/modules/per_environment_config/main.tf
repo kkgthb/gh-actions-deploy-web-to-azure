@@ -74,10 +74,11 @@ resource "github_repository_environment" "the_gh_env" {
   repository  = data.github_repository.current_gh_repo.name
   environment = "${var.workload_nickname}-ghenv-${var.environment_nickname}"
   # Business note:  yes, same reviewer requirements for all environments, in this demo.
-  prevent_self_review = false
-  reviewers {
-    users = [data.github_user.current_gh_logged_in_user.id]
-  }
+  # TODO:  re-add review once done debugging.
+  # prevent_self_review = false
+  # reviewers {
+  #   users = [data.github_user.current_gh_logged_in_user.id]
+  # }
 }
 
 resource "github_actions_variable" "the_gh_env_pointer" {
@@ -165,12 +166,12 @@ resource "azurerm_linux_function_app" "the_az_fa" {
   }
   site_config {
     application_stack {
-      node_version = "24"
+      node_version = "22"
     }
   }
   app_settings = {
-    # Points host connection string replacement to the identity endpoint
-    "AzureWebJobsStorage__accountName" = azurerm_storage_account.the_az_sa.name
+    FUNCTIONS_WORKER_RUNTIME = "node"
+    "AzureWebJobsStorage__accountName" = azurerm_storage_account.the_az_sa.name # Points host connection string replacement to the identity endpoint
   }
 }
 
@@ -206,6 +207,13 @@ resource "azurerm_role_assignment" "functostor_az_rbacra_sac" {
 resource "azurerm_role_assignment" "functostor_az_rbacra_qdc" {
   scope                = azurerm_storage_account.the_az_sa.id
   role_definition_name = "Storage Queue Data Contributor"
+  principal_id         = azurerm_linux_function_app.the_az_fa.identity[0].principal_id
+}
+
+# TODO:  validate if this is right.  LLM-generated.
+resource "azurerm_role_assignment" "functostor_az_rbacra_tdc" {
+  scope                = azurerm_storage_account.the_az_sa.id
+  role_definition_name = "Storage Table Data Contributor"
   principal_id         = azurerm_linux_function_app.the_az_fa.identity[0].principal_id
 }
 
