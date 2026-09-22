@@ -7,7 +7,7 @@ on:
   push:
     branches:
       - main
-  workflow_run: {} # TODO:  take this out when done troubleshooting
+  workflow_dispatch: {} # TODO:  take this out when done troubleshooting
 
 # Maybe we need id-token: 'write' -- I can't remember -- but
 # https://cheatsheetseries.owasp.org/cheatsheets/GitHub_Actions_Security_Cheat_Sheet.html#minimize-github_token-permissions
