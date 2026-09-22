@@ -11,3 +11,8 @@ terraform.tfstate
 terraform.tfstate.backup
 # Except include Terraform dependency version number lockfiles, because we are good supply chain security citizens and we know to do that know.
 !.terraform.lock.hcl
+
+# Ignore Node/NPM-related files
+node_modules
+local.settings.json
+dist
