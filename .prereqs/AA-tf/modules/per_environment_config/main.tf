@@ -120,7 +120,7 @@ resource "azuread_application_federated_identity_credential" "the_entra_appreg_f
 # ---------------
 
 resource "random_string" "random_suffix" {
-  length  = 6
+  length  = 4
   special = false
   upper   = false
 }
@@ -131,7 +131,7 @@ resource "azurerm_resource_group" "the_az_rg" {
 }
 
 resource "azurerm_storage_account" "the_az_sa" {
-  name                      = "${var.workload_nickname}-sa-${var.environment_nickname}-${random_string.random_suffix.result}"
+  name                      = "${var.workload_nickname}sa${var.environment_nickname}${random_string.random_suffix.result}"
   resource_group_name       = azurerm_resource_group.the_az_rg.name
   location                  = azurerm_resource_group.the_az_rg.location
   account_tier              = "Standard"
@@ -140,7 +140,7 @@ resource "azurerm_storage_account" "the_az_sa" {
 }
 
 resource "azurerm_service_plan" "the_az_asp" {
-  name                = "${var.workload_nickname}-asp-${var.environment_nickname}-${random_string.random_suffix.result}"
+  name                = "${var.workload_nickname}asp${var.environment_nickname}${random_string.random_suffix.result}"
   resource_group_name = azurerm_resource_group.the_az_rg.name
   location            = azurerm_resource_group.the_az_rg.location
   os_type             = "Linux"
@@ -148,7 +148,7 @@ resource "azurerm_service_plan" "the_az_asp" {
 }
 
 resource "azurerm_linux_function_app" "the_az_fa" {
-  name                          = "${var.workload_nickname}-fa-${var.environment_nickname}-${random_string.random_suffix.result}"
+  name                          = "${var.workload_nickname}fa${var.environment_nickname}${random_string.random_suffix.result}"
   resource_group_name           = azurerm_resource_group.the_az_rg.name
   location                      = azurerm_resource_group.the_az_rg.location
   service_plan_id               = azurerm_service_plan.the_az_asp.id
@@ -194,5 +194,16 @@ resource "azurerm_role_assignment" "functostor_az_rbacra_qdc" {
   scope                = azurerm_storage_account.the_az_sa.id
   role_definition_name = "Storage Queue Data Contributor"
   principal_id         = azurerm_linux_function_app.the_az_fa.identity[0].principal_id
+}
+
+# ----------------------------------
+# One last GitHub Environment Secret
+# ----------------------------------
+
+resource "github_actions_environment_secret" "gh_env_secret_azure_functionapp_name" {
+  repository  = github_repository_environment.the_gh_env.repository
+  environment = github_repository_environment.the_gh_env.environment
+  secret_name = "AZURE_FUNCTIONAPP_NAME"
+  value       = azurerm_linux_function_app.the_az_fa.name
 }
 
