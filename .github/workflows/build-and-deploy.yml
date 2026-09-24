@@ -71,7 +71,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - id: "download_built_artifact"
-        name: 'Download the "built artifact" folder from CI/CD-pipeline-specific inter-job artifact storage'
+        name: '1/4: Download the "built artifact" folder from CI/CD-pipeline-specific inter-job artifact storage'
         uses: "actions/download-artifact@v8" # TODO for security:  switch to hashes with a comment indicating the version number
         with:
           run-id: "${{ github.run_id }}"
@@ -79,7 +79,7 @@ jobs:
           name: "mybuild_GIVE_ME_A_BETTER_NAME"
           path: "${{ github.workspace }}/folder_where_i_want_the_built_copy_now_in_my_nonprod_deploy_job"
       - id: "log_into_azure_nonprod"
-        name: "Log this GitHub Actions job into the nonprod targeted cloud environment"
+        name: "2/4: Log this GitHub Actions job into the nonprod targeted cloud environment"
         uses: "azure/login@v3" # TODO for security:  switch to hashes with a comment indicating the version number
         with:
           tenant-id: ${{ secrets.ENTRA_TENANT_ID }}
@@ -88,13 +88,13 @@ jobs:
           enable-AzPSSession: true
           allow-no-subscriptions: true
       - id: "deploy_into_nonprod_function_app"
-        name: "Deploy into the nonprod function app"
+        name: "3/4: Deploy into the nonprod function app"
         uses: "Azure/functions-action@v1" # TODO for security:  switch to hashes with a comment indicating the version number
         with:
           app-name: "${{ secrets.AZURE_FUNCTIONAPP_NAME }}"
           package: "${{ github.workspace }}/folder_where_i_want_the_built_copy_now_in_my_nonprod_deploy_job"
       - id: "log_out_of_azure_nonprod"
-        name: "Log the Azure CLI out of the nonprod targeted cloud environment"
+        name: "4/4: Log the Azure CLI out of the nonprod targeted cloud environment"
         run: "az logout" # TODO:  is this necessary?  If so, do I need to manually log out Azure Powershell, too?
 
   deploy_to_prod_job:
@@ -107,7 +107,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - id: "download_built_artifact"
-        name: 'Download the "built artifact" folder from CI/CD-pipeline-specific inter-job artifact storage'
+        name: '1/4: Download the "built artifact" folder from CI/CD-pipeline-specific inter-job artifact storage'
         uses: "actions/download-artifact@v8" # TODO for security:  switch to hashes with a comment indicating the version number
         with:
           run-id: "${{ github.run_id }}"
@@ -115,7 +115,7 @@ jobs:
           name: "mybuild_GIVE_ME_A_BETTER_NAME"
           path: "${{ github.workspace }}/folder_where_i_want_the_built_copy_now_in_my_prod_deploy_job"
       - id: "log_into_azure_prod"
-        name: "Log this GitHub Actions job into the prod targeted cloud environment"
+        name: "2/4: Log this GitHub Actions job into the prod targeted cloud environment"
         uses: "azure/login@v3" # TODO for security:  switch to hashes with a comment indicating the version number
         with:
           tenant-id: ${{ secrets.ENTRA_TENANT_ID }}
@@ -124,11 +124,11 @@ jobs:
           enable-AzPSSession: true
           allow-no-subscriptions: true
       - id: "deploy_into_prod_function_app"
-        name: "Deploy into the prod function app"
+        name: "3/4: Deploy into the prod function app"
         uses: "Azure/functions-action@v1" # TODO for security:  switch to hashes with a comment indicating the version number
         with:
           app-name: "${{ secrets.AZURE_FUNCTIONAPP_NAME }}"
           package: "${{ github.workspace }}/folder_where_i_want_the_built_copy_now_in_my_prod_deploy_job"
       - id: "log_out_of_azure_prod"
-        name: "Log the Azure CLI out of the prod targeted cloud environment"
+        name: "4/4: Log the Azure CLI out of the prod targeted cloud environment"
         run: "az logout" # TODO:  is this necessary?  If so, do I need to manually log out Azure Powershell, too?
