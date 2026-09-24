@@ -25,10 +25,10 @@ jobs:
     steps:
       - id: "checkout"
         name: "Check out repository"
-        uses: "actions/checkout@v7"
+        uses: "actions/checkout@v7" # TODO for security:  switch to hashes with a comment indicating the version number
       - id: "setup_node"
         name: "Setup NodeJS"
-        uses: "actions/setup-node@v7"
+        uses: "actions/setup-node@v7" # TODO for security:  switch to hashes with a comment indicating the version number
         with:
           node-version: 22
       - id: "install_npm_dependencies"
@@ -55,7 +55,7 @@ jobs:
           node -e "const p=require('./dist/package.json'); if (p.main !== 'src/functions/*.js') process.exit(1)"
       - id: "upload_build_artifact"
         name: 'Upload the just-generated "build artifact" folder into CI/CD-pipeline-specific inter-job artifact storage'
-        uses: "actions/upload-artifact@v7"
+        uses: "actions/upload-artifact@v7" # TODO for security:  switch to hashes with a comment indicating the version number
         with:
           name: "mybuild_GIVE_ME_A_BETTER_NAME"
           path: "${{ github.workspace }}/src/web/dist"
@@ -72,7 +72,7 @@ jobs:
     steps:
       - id: "download_built_artifact"
         name: 'Download the "built artifact" folder from CI/CD-pipeline-specific inter-job artifact storage'
-        uses: "actions/download-artifact@v8"
+        uses: "actions/download-artifact@v8" # TODO for security:  switch to hashes with a comment indicating the version number
         with:
           run-id: "${{ github.run_id }}"
           github-token: "${{ secrets.GITHUB_TOKEN }}"
@@ -80,7 +80,7 @@ jobs:
           path: "${{ github.workspace }}/folder_where_i_want_the_built_copy_now_in_my_nonprod_deploy_job"
       - id: "log_into_azure_nonprod"
         name: "Log this GitHub Actions job into the nonprod targeted cloud environment"
-        uses: "azure/login@v3"
+        uses: "azure/login@v3" # TODO for security:  switch to hashes with a comment indicating the version number
         with:
           tenant-id: ${{ secrets.ENTRA_TENANT_ID }}
           client-id: ${{ secrets.ENTRA_CLIENT_ID }}
@@ -89,10 +89,13 @@ jobs:
           allow-no-subscriptions: true
       - id: "deploy_into_nonprod_function_app"
         name: "Deploy into the nonprod function app"
-        uses: "Azure/functions-action@v1"
+        uses: "Azure/functions-action@v1" # TODO for security:  switch to hashes with a comment indicating the version number
         with:
           app-name: "${{ secrets.AZURE_FUNCTIONAPP_NAME }}"
           package: "${{ github.workspace }}/folder_where_i_want_the_built_copy_now_in_my_nonprod_deploy_job"
+      - id: "log_out_of_azure_nonprod"
+        name: "Log the Azure CLI out of the nonprod targeted cloud environment"
+        run: "az logout" # TODO:  is this necessary?  If so, do I need to manually log out Azure Powershell, too?
 
   deploy_to_prod_job:
     needs: "deploy_to_nonprod_job"
@@ -105,7 +108,7 @@ jobs:
     steps:
       - id: "download_built_artifact"
         name: 'Download the "built artifact" folder from CI/CD-pipeline-specific inter-job artifact storage'
-        uses: "actions/download-artifact@v8"
+        uses: "actions/download-artifact@v8" # TODO for security:  switch to hashes with a comment indicating the version number
         with:
           run-id: "${{ github.run_id }}"
           github-token: "${{ secrets.GITHUB_TOKEN }}"
@@ -113,7 +116,7 @@ jobs:
           path: "${{ github.workspace }}/folder_where_i_want_the_built_copy_now_in_my_prod_deploy_job"
       - id: "log_into_azure_prod"
         name: "Log this GitHub Actions job into the prod targeted cloud environment"
-        uses: "azure/login@v3"
+        uses: "azure/login@v3" # TODO for security:  switch to hashes with a comment indicating the version number
         with:
           tenant-id: ${{ secrets.ENTRA_TENANT_ID }}
           client-id: ${{ secrets.ENTRA_CLIENT_ID }}
@@ -122,7 +125,10 @@ jobs:
           allow-no-subscriptions: true
       - id: "deploy_into_prod_function_app"
         name: "Deploy into the prod function app"
-        uses: "Azure/functions-action@v1"
+        uses: "Azure/functions-action@v1" # TODO for security:  switch to hashes with a comment indicating the version number
         with:
           app-name: "${{ secrets.AZURE_FUNCTIONAPP_NAME }}"
           package: "${{ github.workspace }}/folder_where_i_want_the_built_copy_now_in_my_prod_deploy_job"
+      - id: "log_out_of_azure_prod"
+        name: "Log the Azure CLI out of the prod targeted cloud environment"
+        run: "az logout" # TODO:  is this necessary?  If so, do I need to manually log out Azure Powershell, too?
